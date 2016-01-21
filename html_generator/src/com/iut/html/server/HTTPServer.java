@@ -1,4 +1,4 @@
-package com.iut.casir.server;
+package com.iut.html.server;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -7,49 +7,43 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Serveur HTTP
+ * Serveur HTTP 1.0
  * @author durotm & dichetlj
  *
  */
 public class HTTPServer {
 
 	private ServerSocket serverSocket;
-	private final static int PORT = 80;
-	private final static String HOST = "localhost";
 
 	/**
 	 * Constructeur
 	 */
-	public HTTPServer() {
-		// Création du socket serveur
+	public HTTPServer(String hostname, int port) {
+		// CrÃ©ation du socket serveur
 		try {
 			this.serverSocket = new ServerSocket();
-			InetAddress adr = InetAddress.getByName(HOST);
-			InetSocketAddress sa = new InetSocketAddress(adr, PORT);
+			InetAddress adr = InetAddress.getByName(hostname);
+			InetSocketAddress sa = new InetSocketAddress(adr, port);
 			this.serverSocket.bind(sa);
 		} catch (IOException e) {
-			System.out.println("Le serveur n'arrive pas à créer le socket!");
+			System.out.println("Le serveur n'arrive pas Ã  crÃ©er le socket!");
 			System.exit(-1);
 		}
 
-		System.out.println("Le serveur a bien démarré!");
+		System.out.println("Le serveur a bien dÃ©marrÃ©!");
 
-		// Boucle d'écoute
+		// Boucle d'Ã©coute
 		while (true) {
 			try {
 				// On attend une connexion (bloquant)
 				Socket socket = serverSocket.accept();
-				System.out.println("Un client s'est connecté!");
-				// On crée un thread par client connecté
+				System.out.println("Un client s'est connectÃ©!");
+				// On crÃ©e un thread par client connectÃ©
 				HTTPServerThread httpThread = new HTTPServerThread(socket);
 				httpThread.start();
 			} catch (IOException e) {
 				System.out.println("Le client n'a pas pu se connecter!");
 			}
 		}
-	}
-
-	public static void main(String[] args) {
-		new HTTPServer();
 	}
 }

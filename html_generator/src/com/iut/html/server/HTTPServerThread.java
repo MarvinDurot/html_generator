@@ -1,13 +1,14 @@
-package com.iut.casir.server;
+package com.iut.html.server;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.Socket;
+import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -15,7 +16,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.SAXException;
 
-import com.iut.casir.sax.SAXHandler;
+import com.iut.html.entity.Etudiant;
+import com.iut.html.sax.SAXHandler;
 
 /**
  * HTTP Thread
@@ -24,7 +26,9 @@ import com.iut.casir.sax.SAXHandler;
  */
 public class HTTPServerThread extends Thread {
 	
-	private static final String ERROR_MESSAGE = "<html><body><h1>Fichier non trouvé!</h1></body></html>";
+	private static final String ERROR_MESSAGE =
+	"<html><body><head><meta charset=\"utf-8\"></head><h1>Fichier non trouvÃ©!</h1></body></html>";
+	
 	private Socket clientSocket;
 	private SAXParserFactory factory;
 
@@ -37,38 +41,41 @@ public class HTTPServerThread extends Thread {
 		this.factory = SAXParserFactory.newInstance();
 		this.clientSocket = socket;
 	}
-
+	
 	/**
-	 * Implémentation Runnable
+	 * ImplÃ©mentation Runnable
 	 */
 	public void run() {
 		try {
-			// On récupère les flux d'entrée et de sortie
+			// On rÃ©cupÃ¨re les flux d'entrÃ©e et de sortie
 			InputStream is = this.clientSocket.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
 			
-			// On récupère la requête du client
+			// On rÃ©cupÃ©re la requÃªte du client
 			String request = br.readLine();
 			
-			// Si c'est une requête HTTP GET
+			// Si c'est une requÃªte HTTP GET
 			if ((request != null) && (request.startsWith("GET "))) {
 				
-				// Récupère le fichier si il existe
+				// RÃ©cupÃ¨re le fichier demandÃ© s'il existe
 				File file = new File(request.substring(5, request.indexOf("HTTP")));
 				
+				// TODO : rÃ©cupÃ©rer et traiter les paramÃ¨tres s'il y en a...
+				
 				if (file.isFile()) {
-					// Lecture du fichier				
+					// Lecture du fichier		
 					InputStream fileInputStream = new FileInputStream(file);
+					
 					// Parsage du fichier
 		            SAXParser saxParser = this.factory.newSAXParser();
 		            SAXHandler handler = new SAXHandler();
 		            saxParser.parse(fileInputStream, handler);
-					
+		            
 					// On envoie le contenu du fichier vers le client
 					this.clientSocket.getOutputStream().write(handler.getHtmlContent().getBytes());
 				} else {
-					this.clientSocket.getOutputStream().write(this.ERROR_MESSAGE.getBytes());
-					System.out.println("Fichier non trouvé!");
+					this.clientSocket.getOutputStream().write(HTTPServerThread.ERROR_MESSAGE.getBytes());
+					System.out.println("Fichier non trouvÃ©!");
 				}
 			}
 			
@@ -77,13 +84,13 @@ public class HTTPServerThread extends Thread {
 			br.close();
 			
 		} catch (IOException | SAXException | ParserConfigurationException e) {
-			System.out.println("Le serveur n'arrive pas à fermer le flux du buffer!");
+			System.out.println("Le serveur n'arrive pas Ã  fermer le flux du buffer!");
 			System.exit(-1);
 		}
 		try {
 			this.clientSocket.close();
 		} catch (IOException e) {
-			System.out.println("Le serveur n'arrive à fermer le socket!");
+			System.out.println("Le serveur n'arrive pas Ã  fermer le socket!");
 			System.exit(-1);
 		}
 	}

@@ -1,4 +1,4 @@
-package com.iut.casir.entity;
+package com.iut.html.entity;
 
 /**
  * Représentation d'un étudiant

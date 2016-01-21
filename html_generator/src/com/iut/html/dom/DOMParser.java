@@ -1,20 +1,17 @@
-package com.iut.casir.dom;
+package com.iut.html.dom;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.iut.casir.entity.Etudiant;
+import com.iut.html.entity.Etudiant;
 
 /**
  * Lit et enregistre les étudiants d'un fichier XML sous forme d'ArrayList
@@ -39,8 +36,9 @@ public class DOMParser {
 	 * @throws IOException
 	 */
 	public void parser(File file) throws IOException {
-		final DocumentBuilderFactory factory = DocumentBuilderFactory
-				.newInstance();
+		// Création de la factory pour obtenir le document
+		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		
 		try {
 			final DocumentBuilder builder = factory.newDocumentBuilder();
 			this.document = builder.parse(file);
