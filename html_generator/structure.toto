@@ -1,0 +1,5 @@
+<mapage titre="Liste des étudiants"> 
+	<liste source="G:/casir/java/mini_projet/etudiants.xml">
+	</liste>
+</mapage>
+

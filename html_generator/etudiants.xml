@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding ="utf-8"?>
+<étudiants>
+	<étudiant>
+		<nom> Machin </nom>
+		<prénom> Dupont </prénom>
+		<groupe> 1 </groupe>
+	</étudiant>
+	<étudiant>
+		<nom> Gilbert </nom>
+		<prénom> Montagné </prénom>
+		<groupe> 2 </groupe>
+	</étudiant>
+	<étudiant>
+		<nom> Ducrot </nom>
+		<prénom> Marvin </prénom>
+		<groupe> 7 </groupe>
+	</étudiant>
+	<étudiant>
+		<nom> Gooby </nom>
+		<prénom> Dolan </prénom>
+		<groupe> 2 </groupe>
+	</étudiant>
+	<étudiant>
+		<nom> Philipe </nom>
+		<prénom> Objois </prénom>
+		<groupe> 3 </groupe>
+	</étudiant>
+</étudiants>
