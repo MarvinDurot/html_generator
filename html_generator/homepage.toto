@@ -1,5 +1,0 @@
-<mapage titre="Générateur de HTML">
-	<entete> Liste des étudiants </entete>
-	<retour></retour>
-	<liste source="etudiants.xml"></liste>
-</mapage>
