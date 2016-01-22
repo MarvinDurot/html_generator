@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.regex.PatternSyntaxException;
 
 import javax.management.BadAttributeValueExpException;
 import javax.print.AttributeException;
@@ -30,8 +31,8 @@ public class HTTPRequestHandler
 	private File file;
 	private HashMap<String, String> parameters;
 	private SAXParserFactory factory;
-	
-	
+
+
 	/**
 	 * Constructor
 	 * @param request
@@ -41,30 +42,28 @@ public class HTTPRequestHandler
 	public HTTPRequestHandler(String request) throws HTTPBadRequestException
 	{
 		this.factory = SAXParserFactory.newInstance();
-		
+
 		// Teste la validité de la requête
 		if (request == null || ! request.startsWith("GET "))
 			throw new HTTPBadRequestException();
 		else
 			request = request.substring(5, request.indexOf("HTTP"));
 		
-		// Récupère le fichier demandé
-		File file = new File(request.split("?")[0]);
-		
+		// Récupération du fichier demandé et des paramètres de la requête
+		if(request.indexOf("?") != -1) {
+			this.file = new File(request.substring(0, request.indexOf("?")));
+			this.parameters = this.parseParameters(request.substring(request.indexOf("?")+1));
+		} else {
+			this.file = new File(request);
+			this.parameters = new HashMap<String, String>();
+
+		}
+
 		// Teste si le fichier demandé existe
-		if (file.isFile())
-			this.file = file;
-		else
+		if (! this.file.isFile())
 			throw new HTTPBadRequestException();
-		
-		// Récupération des paramètres de la requête
-		if(request.split("?").length > 1) {
-            this.parameters = this.parseParameters(request.split("?")[1]);
-        } else {
-            this.parameters = new HashMap<String, String>();           
-        }
 	}
-	
+
 	/**
 	 * Retourne la réponse à la requête du client
 	 * 
@@ -77,15 +76,15 @@ public class HTTPRequestHandler
 	{
 		// Lecture du fichier		
 		InputStream fileInputStream = new FileInputStream(this.file);
-		
+
 		// Parsage du fichier
-        SAXParser saxParser = this.factory.newSAXParser();
-        SAXHandler saxHandler = new SAXHandler();
-        saxParser.parse(fileInputStream, saxHandler);
-        
-        return saxHandler.getHtmlContent().getBytes();
+		SAXParser saxParser = this.factory.newSAXParser();
+		SAXHandler saxHandler = new SAXHandler();
+		saxParser.parse(fileInputStream, saxHandler);
+
+		return saxHandler.getHtmlContent().getBytes();
 	}
-	
+
 	/**
 	 * Transforme une chaine de paramètres en une HashMap
 	 * @param parameters
@@ -93,15 +92,23 @@ public class HTTPRequestHandler
 	 */
 	private HashMap<String, String> parseParameters(String rawParams)
 	{
-		String[] arrayParams = rawParams.split("&");
-		HashMap<String, String> mapParams = new HashMap<String, String>(); 
-		
-		for (int i = 0; i < arrayParams.length; i++) {
-			String[] field = arrayParams[i].split("=");			
-			mapParams.put(field[0], field[1]);
+		HashMap<String, String> mapParams = new HashMap<String, String>();
+		String[] arrayParams;
+
+		try {
+			arrayParams = rawParams.split("&");
+			// Parcours des paramètres
+			for (int i = 0; i < arrayParams.length; i++) {
+				String[] field = arrayParams[i].split("=");			
+				mapParams.put(field[0], field[1]);
+			}
+		} catch (PatternSyntaxException e)
+		{
+			String[] field = rawParams.split("=");	
+			mapParams.put(field[0], field[1]);	
 		}
-		
+
 		return mapParams;
 	}
-	
+
 }

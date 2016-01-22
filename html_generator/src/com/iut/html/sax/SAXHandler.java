@@ -2,12 +2,14 @@ package com.iut.html.sax;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
 import com.iut.html.dom.DOMParser;
 import com.iut.html.entity.Etudiant;
+import com.iut.html.entity.EtudiantMap;
 
 /**
  * Classe de callbacks utilisées par le parseur SAX
@@ -16,6 +18,13 @@ import com.iut.html.entity.Etudiant;
  */
 public class SAXHandler extends DefaultHandler {
 
+	public final static String MAPAGE = "mapage";
+	public final static String ENTETE = "entete";
+	public final static String RETOUR = "retour";
+	public final static String LISTE = "liste";
+	public final static String CARTE = "carte";
+	public final static String ETUDIANT = "etudiant";
+	
 	private String htmlContent;
 
 	@Override
@@ -23,20 +32,26 @@ public class SAXHandler extends DefaultHandler {
 	{
 		// Analyse balise
 		switch (qName) {
-		case "mapage":
+		case SAXHandler.MAPAGE:
 			this.htmlContent += "<head><title>" + atts.getValue("titre")
 			+ "</title><meta charset=\"utf-8\"></head><body>";
 			break;
-		case "entete":
+		case SAXHandler.ENTETE:
 			this.htmlContent += "<h1>";
 			break;
-		case "retour":
+		case SAXHandler.RETOUR:
 			this.htmlContent += "<br/>";
 			break;
-		case "liste":
+		case SAXHandler.LISTE:
 			File file = new File(atts.getValue("source"));
 			this.htmlContent += "<table>";
 			this.generateList(file);
+			break;
+		case SAXHandler.CARTE:
+			this.htmlContent += "<form method=\"GET\" action=\"\" >";
+			break;
+		case SAXHandler.ETUDIANT:
+			// TODO
 			break;
 		default:
 			break;
@@ -101,16 +116,16 @@ public class SAXHandler extends DefaultHandler {
 		this.htmlContent += "<tbody>";
 		
 		// Récupération des étudiants
-		ArrayList<Etudiant> etudiants = domParser.getEtudiants();
-
-		// Parcours de étudiants
-		for (int i = 0 ; i < etudiants.size() ; i++ )
-		{
-			this.htmlContent += "<tr><td>" + etudiants.get(i).getNom()
-					+ "</td><td>" + etudiants.get(i).getPrenom() + "</td><td>"
-					+ etudiants.get(i).getGroupe() + "</td></tr>";
-		}
+		EtudiantMap etudiants = domParser.getEtudiants();
 		
+		// Parcour des étudiants
+		for (EtudiantMap.Entry etudiant : etudiants.entrySet()) {
+			this.htmlContent += "<tr ><td>" + ((Etudiant) etudiant.getValue()).getNom()
+					+ "</td><td>" + ((Etudiant) etudiant.getValue()).getPrenom() + "</td><td>"
+					+ ((Etudiant) etudiant.getValue()).getGroupe()
+					+ "</td><td><a href=\"/details.toto?id="+ etudiant.getKey() + "\">Afficher détail</a></td></tr>";
+		}
+
 		// Fin du corps du tableau
 		this.htmlContent += "</tbody>";
 	}
