@@ -40,9 +40,6 @@ public class HTTPRequestHandler
 	{
 		this.factory = SAXParserFactory.newInstance();
 
-		// Log
-		System.out.println("Log requête : " + request);
-
 		// Teste la validité de la requête
 		if (request == null || ! request.startsWith("GET "))
             throw new HTTPBadRequestException();

@@ -54,7 +54,7 @@ public class HTTPServerThread extends Thread {
 				
 			} catch (HTTPBadRequestException e) {
 				this.clientSocket.getOutputStream().write(HTTPServerThread.ERROR_MESSAGE.getBytes());
-				System.out.println("Fichier non trouvé!");
+				System.out.println("Requête invalide!");
 			}
 			
 			// Fermeture du buffer et du socket client
