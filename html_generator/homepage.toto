@@ -1,5 +1,5 @@
 <mapage titre="Générateur de HTML">
 	<entete> Liste des étudiants </entete>
-	<retour></retour>
-	<liste source="etudiants.xml"></liste>
+	<liste lien="details.toto"></liste>
+	<lien destination="details.toto?id=0">Créer un nouvel étudiant</lien>
 </mapage>

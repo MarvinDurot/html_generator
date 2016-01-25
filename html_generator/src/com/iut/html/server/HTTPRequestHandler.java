@@ -11,6 +11,10 @@ import java.util.regex.PatternSyntaxException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.*;
+import com.iut.html.Application;
+import com.iut.html.entity.Etudiant;
+import com.iut.html.entity.EtudiantMap;
 import org.xml.sax.SAXException;
 import com.iut.html.sax.SAXHandler;
 
@@ -25,18 +29,24 @@ public class HTTPRequestHandler
 {
 
 	private File file;
+	private EtudiantMap etudiants;
 	private HashMap<String, String> parameters;
 	private SAXParserFactory factory;
 
     // Extensions autorisés
     private static Pattern fileExtnPtrn = Pattern.compile("([^\\s]+(\\.(?i)(toto))$)");
 
+	// Actions formulaire
+	public final static String CREATE = "create";
+	public final static String UPDATE = "update";
+	public final static String DELETE = "delete";
+
 	/**
 	 * Constructor
 	 * @param request
 	 * @throws HTTPBadRequestException
 	 */
-	public HTTPRequestHandler(String request) throws HTTPBadRequestException
+	public HTTPRequestHandler(String request) throws HTTPBadRequestException, ParserConfigurationException, TransformerException
 	{
 		this.factory = SAXParserFactory.newInstance();
 
@@ -65,6 +75,46 @@ public class HTTPRequestHandler
 		// Teste si le fichier demandé est valide
 		if (! (this.file.isFile() && mtch.matches()))
             throw new HTTPBadRequestException();
+
+		// Chargement des étudiants et traitement des actions formulaire
+		this.etudiants = Application.getEtudiants();
+		this.handleActions();
+	}
+
+	/**
+	 * Traite les actions renvoyés par les formulaires
+	 */
+	private void handleActions() throws ParserConfigurationException, TransformerException
+	{
+		Etudiant etudiant;
+		String action = this.parameters.get("action");
+
+		if (action != null) {
+			switch (action) {
+				case HTTPRequestHandler.CREATE:
+					// Création d'un étudiant
+					etudiant = new Etudiant(this.parameters.get("nom"), this.parameters.get("prenom"), this.parameters.get("groupe"));
+					this.etudiants.put(etudiant.generateHash(), etudiant);
+					Application.updateEtudiants(this.etudiants);
+					break;
+				case HTTPRequestHandler.UPDATE:
+					// Mise à jour d'un étudiant
+					etudiant = this.etudiants.get(this.parameters.get("id"));
+					etudiant.setNom(this.parameters.get("nom"));
+					etudiant.setPrenom(this.parameters.get("prenom"));
+					etudiant.setGroupe(this.parameters.get("groupe"));
+					this.etudiants.put(this.parameters.get("id"), etudiant);
+					Application.updateEtudiants(this.etudiants);
+					break;
+				case HTTPRequestHandler.DELETE:
+					// Supression d'un étudiant
+					this.etudiants.remove(this.parameters.get("id"));
+					Application.updateEtudiants(this.etudiants);
+					break;
+				default:
+					break;
+			}
+		}
 	}
 
 	/**
@@ -82,8 +132,9 @@ public class HTTPRequestHandler
 
 		// Parsage du fichier
 		SAXParser saxParser = this.factory.newSAXParser();
+
         // On transmet les paramètres au SAXHandler
-		SAXHandler saxHandler = new SAXHandler(this.parameters);
+		SAXHandler saxHandler = new SAXHandler(this.parameters, this.etudiants);
 		saxParser.parse(fileInputStream, saxHandler);
 
 		// Fermeture du fichier

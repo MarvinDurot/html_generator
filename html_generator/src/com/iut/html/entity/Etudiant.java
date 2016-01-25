@@ -16,10 +16,20 @@ public class Etudiant {
 	 * @param prenom
 	 * @param groupe
 	 */
-	public Etudiant(String nom, String prenom, String groupe) {
+	public Etudiant(String nom, String prenom, String groupe)
+	{
 		this.nom = nom;
 		this.prenom = prenom;
 		this.groupe = groupe;
+	}
+
+	/**
+	 * Génère un hash en fonction du nom et du prénom
+	 * @return String
+     */
+	public String generateHash()
+	{
+		return String.valueOf((this.nom + this.prenom).hashCode());
 	}
 	
 	public String getNom() {

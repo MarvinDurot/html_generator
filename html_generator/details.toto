@@ -1,4 +1,5 @@
 <mapage titre="Détails">
     <entete>Détails</entete>
-    <etudiant source="etudiants.xml"></etudiant>
+    <etudiant></etudiant>
+    <lien destination="homepage.toto">Retour</lien>
 </mapage>

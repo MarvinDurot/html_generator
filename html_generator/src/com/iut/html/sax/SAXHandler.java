@@ -17,22 +17,26 @@ import com.iut.html.entity.EtudiantMap;
  */
 public class SAXHandler extends DefaultHandler {
 
+	// Balises reconnues
 	public final static String MAPAGE = "mapage";
 	public final static String ENTETE = "entete";
-	public final static String RETOUR = "retour";
+	public final static String LIEN = "lien";
 	public final static String LISTE = "liste";
 	public final static String ETUDIANT = "etudiant";
 	
 	private String htmlContent;
 	private HashMap<String, String> parameters;
+	private EtudiantMap etudiants;
 
 	/**
 	 * Constructeur
 	 * @param parameters
+	 * @param etudiants
      */
-	public SAXHandler(HashMap<String, String> parameters) {
+	public SAXHandler(HashMap<String, String> parameters, EtudiantMap etudiants) {
 		this.htmlContent = "";
 		this.parameters = parameters;
+		this.etudiants = etudiants;
 	}
 
 	@Override
@@ -45,18 +49,18 @@ public class SAXHandler extends DefaultHandler {
 			+ "</title><meta charset=\"utf-8\"></head><body>";
 			break;
 		case SAXHandler.ENTETE:
-			this.htmlContent += "<h1>";
+			this.htmlContent += "<h1 style=\"text-align: center;\">";
 			break;
-		case SAXHandler.RETOUR:
-			this.htmlContent += "<br/>";
+		case SAXHandler.LIEN:
+			this.htmlContent += "<a href=\"" + atts.getValue("destination") + "\" style=\"display: block; text-align: center; margin-top: 20px;\">";
 			break;
 		case SAXHandler.LISTE:
-			this.htmlContent += "<table>";
-			this.generateList(new File(atts.getValue("source")));
+			this.htmlContent += "<table style=\"padding-top: 10px; margin: auto; width: 600px; text-align: center;\">";
+			this.generateList(atts.getValue("lien"));
 			break;
 		case SAXHandler.ETUDIANT:
-			this.htmlContent += "<form method=\"GET\" action=\"#\" >";
-			this.generateForm(new File(atts.getValue("source")));
+			this.htmlContent += "<form method=\"GET\" action=\"#\" style=\"width: 170px; margin: auto;\">";
+			this.generateForm();
 			break;
 		default:
 			break;
@@ -73,6 +77,9 @@ public class SAXHandler extends DefaultHandler {
 			break;
 		case SAXHandler.ENTETE:
 			this.htmlContent += "</h1>";
+			break;
+		case SAXHandler.LIEN:
+			this.htmlContent += "</a>";
 			break;
 		case SAXHandler.LISTE:
 			this.htmlContent += "</table>";
@@ -122,51 +129,48 @@ public class SAXHandler extends DefaultHandler {
 	/**
 	 * Génère la liste des étudiants sous forme de tableau HTML,
 	 * le résultat est ajouté au contenu HTML courant
-	 * 
-	 * @param file
-	 * @return
+	 * @param link
 	 */
-	private void generateList(File file)
+	private void generateList(String link)
 	{
 		// Génération de l'entête du tableau
 		this.htmlContent += "<thead><tr><th>Nom</th><th>Prénom</th><th>Groupe</th></tr></thead>";
 		this.htmlContent += "<tbody>";
 		
-		// Récupération des étudiants
-		EtudiantMap etudiants = this.loadEtudiants(file);
-		
 		// Parcours des étudiants
-		for (EtudiantMap.Entry etudiant : etudiants.entrySet()) {
+		for (EtudiantMap.Entry etudiant : this.etudiants.entrySet()) {
 			this.htmlContent += "<tr ><td>" + ((Etudiant) etudiant.getValue()).getNom();
 			this.htmlContent += "</td><td>" + ((Etudiant) etudiant.getValue()).getPrenom();
 			this.htmlContent += "</td><td>"	+ ((Etudiant) etudiant.getValue()).getGroupe();
-			this.htmlContent += "</td><td><a href=\"/details.toto?action=view&id=" + etudiant.getKey() + "\">Afficher détail</a></td></tr>";
+			this.htmlContent += "</td><td><a href=\"" + link + "?action=view&id=" + etudiant.getKey() + "\">Afficher détail</a></td></tr>";
 		}
 
 		// Fin du corps du tableau
 		this.htmlContent += "</tbody>";
 	}
 
-	private void generateForm(File file)
+	/**
+	 * Génère le formulaire d'édition d'un étudiant
+	 */
+	private void generateForm()
 	{
-		// Récupération des étudiants
-		EtudiantMap etudiants = this.loadEtudiants(file);
-		Etudiant etudiant = etudiants.get(this.parameters.get("id"));
+		// Récupération de l'étudiant
+		Etudiant etudiant = this.etudiants.get(this.parameters.get("id"));
 
 		// Mode édition
 		if (etudiant != null) {
 			this.htmlContent += "<input type=\"hidden\" name=\"id\" value=\""+ this.parameters.get("id") + "\">";
-			this.htmlContent += "<input type=\"text\" name=\"nom\" value=\""+ etudiant.getNom() + "\">";
-			this.htmlContent += "<input type=\"text\" name=\"prenom\" value=\""+ etudiant.getPrenom() + "\">";
-			this.htmlContent += "<input type=\"text\" name=\"groupe\" value=\""+ etudiant.getGroupe() + "\">";
-			this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"update\">";
-			this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"delete\">";
+			this.htmlContent += "<label>Nom : </label><input type=\"text\" name=\"nom\" value=\""+ etudiant.getNom() + "\" required>";
+			this.htmlContent += "<label>Prénom : </label><input type=\"text\" name=\"prenom\" value=\""+ etudiant.getPrenom() + "\" required>";
+			this.htmlContent += "<label>Groupe : </label><input type=\"text\" name=\"groupe\" value=\""+ etudiant.getGroupe() + "\" required>";
+			this.htmlContent += "<button type=\"submit\" name=\"action\" value=\"update\" style=\"margin-top: 10px;\">Sauvegarder</button>";
+			this.htmlContent += "<button type=\"submit\" name=\"action\" value=\"delete\" style=\"margin-top: 5px;\">Supprimer</button>";
 			// Mode création
 		} else {
-			this.htmlContent += "<input type=\"text\" name=\"nom\" value=\"Entrez un nom...\">";
-			this.htmlContent += "<input type=\"text\" name=\"prenom\" value=\"Entrez un prénom...\">";
-			this.htmlContent += "<input type=\"text\" name=\"groupe\" value=\"Entrez un groupe...\">";
-			this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"create\">";
+			this.htmlContent += "<label>Nom : </label><input type=\"text\" name=\"nom\" placeholder=\"Entrez un nom...\" required>";
+			this.htmlContent += "<label>Prénom : </label><input type=\"text\" name=\"prenom\" placeholder=\"Entrez un prénom...\" required>";
+			this.htmlContent += "<label>Groupe : </label><input type=\"text\" name=\"groupe\" placeholder=\"Entrez un groupe...\" required>";
+			this.htmlContent += "<button type=\"submit\" name=\"action\" value=\"create\" style=\"margin-top: 10px;\">Créer</button>";
 		}
 	}
 

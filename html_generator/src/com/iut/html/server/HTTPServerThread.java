@@ -1,17 +1,13 @@
 package com.iut.html.server;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.TransformerException;
 import org.xml.sax.SAXException;
-import com.iut.html.sax.SAXHandler;
 
 /**
  * HTTP Thread
@@ -21,7 +17,7 @@ import com.iut.html.sax.SAXHandler;
 public class HTTPServerThread extends Thread {
 	
 	private static final String ERROR_MESSAGE =
-	"<html><body><head><meta charset=\"utf-8\"></head><h1>Fichier non trouvé!</h1></body></html>";
+	"<html><body><head><meta charset=\"utf-8\"></head><h1>Requête invalide !</h1></body></html>";
 	
 	private Socket clientSocket;
 
@@ -55,7 +51,7 @@ public class HTTPServerThread extends Thread {
 			} catch (HTTPBadRequestException e) {
 				this.clientSocket.getOutputStream().write(HTTPServerThread.ERROR_MESSAGE.getBytes());
 				System.out.println("Requête invalide!");
-			}
+			} catch (TransformerException e) {}
 			
 			// Fermeture du buffer et du socket client
 			this.clientSocket.close();
