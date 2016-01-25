@@ -12,6 +12,6 @@ import com.iut.html.server.HTTPServer;
 public class Application {
 
 	public static void main(String[] args) throws SAXException, IOException {
-		new HTTPServer("localhost", 80);
+		new HTTPServer("localhost", 8080);
 	}
 }

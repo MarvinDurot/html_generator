@@ -37,27 +37,31 @@ public class HTTPRequestHandler
 	 * Constructor
 	 * @param request
 	 * @throws HTTPBadRequestException 
-	 * @throws HTTPUnknownMethod 
 	 */
 	public HTTPRequestHandler(String request) throws HTTPBadRequestException
 	{
 		this.factory = SAXParserFactory.newInstance();
+
+		// Log
+		System.out.println("Log requête : " + request);
 
 		// Teste la validité de la requête
 		if (request == null || ! request.startsWith("GET "))
 			throw new HTTPBadRequestException();
 		else
 			request = request.substring(5, request.indexOf("HTTP"));
-		
+
 		// Récupération du fichier demandé et des paramètres de la requête
 		if(request.indexOf("?") != -1) {
 			this.file = new File(request.substring(0, request.indexOf("?")));
-			this.parameters = this.parseParameters(request.substring(request.indexOf("?")+1));
+			this.parameters = this.parseParameters(request.substring(request.indexOf("?") + 1));
 		} else {
 			this.file = new File(request);
 			this.parameters = new HashMap<String, String>();
-
 		}
+
+		// Log
+		System.out.println("Fichier demandé : " + file.getAbsolutePath());
 
 		// Teste si le fichier demandé existe
 		if (! this.file.isFile())
@@ -74,7 +78,7 @@ public class HTTPRequestHandler
 	 */
 	public byte[] getResponse() throws ParserConfigurationException, SAXException, IOException
 	{
-		// Lecture du fichier		
+		// Lecture du fichier
 		InputStream fileInputStream = new FileInputStream(this.file);
 
 		// Parsage du fichier
@@ -82,12 +86,15 @@ public class HTTPRequestHandler
 		SAXHandler saxHandler = new SAXHandler();
 		saxParser.parse(fileInputStream, saxHandler);
 
+		// Fermeture du fichier
+		fileInputStream.close();
+
 		return saxHandler.getHtmlContent().getBytes();
 	}
 
 	/**
 	 * Transforme une chaine de paramètres en une HashMap
-	 * @param parameters
+	 * @param rawParams
 	 * @return HashMap
 	 */
 	private HashMap<String, String> parseParameters(String rawParams)
