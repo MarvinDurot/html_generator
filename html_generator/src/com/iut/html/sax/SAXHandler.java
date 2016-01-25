@@ -153,12 +153,21 @@ public class SAXHandler extends DefaultHandler {
 		EtudiantMap etudiants = this.loadEtudiants(file);
 		Etudiant etudiant = etudiants.get(this.parameters.get("id"));
 
-		this.htmlContent += "<input type=\"hidden\" name=\"id\" value=\""+ this.parameters.get("id") + "\">";
-		this.htmlContent += "<input type=\"text\" name=\"nom\" value=\""+ etudiant.getNom() + "\">";
-		this.htmlContent += "<input type=\"text\" name=\"prenom\" value=\""+ etudiant.getPrenom() + "\">";
-		this.htmlContent += "<input type=\"text\" name=\"groupe\" value=\""+ etudiant.getGroupe() + "\">";
-		this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"update\">";
-		this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"delete\">";
+		// Mode édition
+		if (etudiant != null) {
+			this.htmlContent += "<input type=\"hidden\" name=\"id\" value=\""+ this.parameters.get("id") + "\">";
+			this.htmlContent += "<input type=\"text\" name=\"nom\" value=\""+ etudiant.getNom() + "\">";
+			this.htmlContent += "<input type=\"text\" name=\"prenom\" value=\""+ etudiant.getPrenom() + "\">";
+			this.htmlContent += "<input type=\"text\" name=\"groupe\" value=\""+ etudiant.getGroupe() + "\">";
+			this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"update\">";
+			this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"delete\">";
+			// Mode création
+		} else {
+			this.htmlContent += "<input type=\"text\" name=\"nom\" value=\"Entrez un nom...\">";
+			this.htmlContent += "<input type=\"text\" name=\"prenom\" value=\"Entrez un prénom...\">";
+			this.htmlContent += "<input type=\"text\" name=\"groupe\" value=\"Entrez un groupe...\">";
+			this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"create\">";
+		}
 	}
 
 	/**
