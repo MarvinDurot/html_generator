@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -15,7 +17,7 @@ import com.iut.html.sax.SAXHandler;
 /**
  * Classe de callbacks utilisées par le serveur HTTP
  * pour traiter les requêtes des clients
- * 
+ *
  * @author durotm & dichtelj
  *
  */
@@ -26,11 +28,13 @@ public class HTTPRequestHandler
 	private HashMap<String, String> parameters;
 	private SAXParserFactory factory;
 
+    // Extensions autorisés
+    private static Pattern fileExtnPtrn = Pattern.compile("([^\\s]+(\\.(?i)(toto))$)");
 
 	/**
 	 * Constructor
 	 * @param request
-	 * @throws HTTPBadRequestException 
+	 * @throws HTTPBadRequestException
 	 */
 	public HTTPRequestHandler(String request) throws HTTPBadRequestException
 	{
@@ -58,14 +62,17 @@ public class HTTPRequestHandler
         System.out.println("Fichier demandé : " + this.file.getPath());
         System.out.println("Paramètres : " + this.parameters.toString());
 
-		// Teste si le fichier demandé existe
-		if (! this.file.isFile())
+        // Vérification de l'extension
+        Matcher mtch = fileExtnPtrn.matcher(this.file.getName());
+
+		// Teste si le fichier demandé est valide
+		if (! (this.file.isFile() && mtch.matches()))
             throw new HTTPBadRequestException();
 	}
 
 	/**
 	 * Retourne la réponse à la requête du client
-	 * 
+	 *
 	 * @return byte[]
 	 * @throws ParserConfigurationException
 	 * @throws SAXException
@@ -101,13 +108,13 @@ public class HTTPRequestHandler
 			arrayParams = rawParams.split("&");
 			// Parcours des paramètres
 			for (int i = 0; i < arrayParams.length; i++) {
-				String[] field = arrayParams[i].split("=");			
+				String[] field = arrayParams[i].split("=");
 				mapParams.put(field[0], field[1]);
 			}
 		} catch (PatternSyntaxException e)
 		{
-			String[] field = rawParams.split("=");	
-			mapParams.put(field[0], field[1]);	
+			String[] field = rawParams.split("=");
+			mapParams.put(field[0], field[1]);
 		}
 
 		return mapParams;
