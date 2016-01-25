@@ -82,7 +82,8 @@ public class HTTPRequestHandler
 
 		// Parsage du fichier
 		SAXParser saxParser = this.factory.newSAXParser();
-		SAXHandler saxHandler = new SAXHandler();
+        // On transmet les paramètres au SAXHandler
+		SAXHandler saxHandler = new SAXHandler(this.parameters);
 		saxParser.parse(fileInputStream, saxHandler);
 
 		// Fermeture du fichier

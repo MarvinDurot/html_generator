@@ -23,7 +23,7 @@ import com.iut.html.entity.EtudiantMap;
  */
 public class DOMParser {
 
-	private EtudiantMap etudiants;
+	private static EtudiantMap etudiants;
 	private Document document;
 
 	/**
@@ -38,7 +38,7 @@ public class DOMParser {
 	 * @param file
 	 * @throws IOException
 	 */
-	public void parser(File file) throws IOException {
+	public void parse(File file) throws IOException {
 		// Création de la factory pour obtenir le document
 		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		

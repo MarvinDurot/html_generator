@@ -1,5 +1,4 @@
-<mapage titre="Détails"> 
-	<carte source="etudiants.xml">
-		<etudiant id="{{id}}"></etudiant>
-	</carte>
+<mapage titre="Détails">
+    <entete>Détails</entete>
+    <etudiant source="etudiants.xml"></etudiant>
 </mapage>

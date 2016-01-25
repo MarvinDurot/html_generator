@@ -2,11 +2,10 @@ package com.iut.html.sax;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.util.HashMap;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-
 import com.iut.html.dom.DOMParser;
 import com.iut.html.entity.Etudiant;
 import com.iut.html.entity.EtudiantMap;
@@ -22,10 +21,19 @@ public class SAXHandler extends DefaultHandler {
 	public final static String ENTETE = "entete";
 	public final static String RETOUR = "retour";
 	public final static String LISTE = "liste";
-	public final static String CARTE = "carte";
 	public final static String ETUDIANT = "etudiant";
 	
 	private String htmlContent;
+	private HashMap<String, String> parameters;
+
+	/**
+	 * Constructeur
+	 * @param parameters
+     */
+	public SAXHandler(HashMap<String, String> parameters) {
+		this.htmlContent = "";
+		this.parameters = parameters;
+	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
@@ -43,15 +51,12 @@ public class SAXHandler extends DefaultHandler {
 			this.htmlContent += "<br/>";
 			break;
 		case SAXHandler.LISTE:
-			File file = new File(atts.getValue("source"));
 			this.htmlContent += "<table>";
-			this.generateList(file);
-			break;
-		case SAXHandler.CARTE:
-			this.htmlContent += "<form method=\"GET\" action=\"\" >";
+			this.generateList(new File(atts.getValue("source")));
 			break;
 		case SAXHandler.ETUDIANT:
-			// TODO
+			this.htmlContent += "<form method=\"GET\" action=\"#\" >";
+			this.generateForm(new File(atts.getValue("source")));
 			break;
 		default:
 			break;
@@ -63,14 +68,17 @@ public class SAXHandler extends DefaultHandler {
 	{
 		// Analyse balise
 		switch (qName) {
-		case "mapage":
+		case SAXHandler.MAPAGE:
 			this.htmlContent += "</body>";
 			break;
-		case "entete":
+		case SAXHandler.ENTETE:
 			this.htmlContent += "</h1>";
 			break;
-		case "liste":
+		case SAXHandler.LISTE:
 			this.htmlContent += "</table>";
+			break;
+		case SAXHandler.ETUDIANT:
+			this.htmlContent += "</form>";
 			break;
 		default:
 			break;
@@ -94,6 +102,24 @@ public class SAXHandler extends DefaultHandler {
 	}
 
 	/**
+	 * Récupère les étudiants
+	 * @param file
+	 * @return EtudiantMap
+     */
+	private EtudiantMap loadEtudiants(File file)
+	{
+		DOMParser domParser = new DOMParser();
+
+		try {
+			domParser.parse(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return domParser.getEtudiants();
+	}
+
+	/**
 	 * Génère la liste des étudiants sous forme de tableau HTML,
 	 * le résultat est ajouté au contenu HTML courant
 	 * 
@@ -102,32 +128,37 @@ public class SAXHandler extends DefaultHandler {
 	 */
 	private void generateList(File file)
 	{
-		DOMParser domParser = new DOMParser();
-
-		try {
-			domParser.parser(file);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		// Génération de l'entête du tableau
 		this.htmlContent += "<thead><tr><th>Nom</th><th>Prénom</th><th>Groupe</th></tr></thead>";
 		this.htmlContent += "<tbody>";
 		
 		// Récupération des étudiants
-		EtudiantMap etudiants = domParser.getEtudiants();
+		EtudiantMap etudiants = this.loadEtudiants(file);
 		
-		// Parcour des étudiants
+		// Parcours des étudiants
 		for (EtudiantMap.Entry etudiant : etudiants.entrySet()) {
-			this.htmlContent += "<tr ><td>" + ((Etudiant) etudiant.getValue()).getNom()
-					+ "</td><td>" + ((Etudiant) etudiant.getValue()).getPrenom() + "</td><td>"
-					+ ((Etudiant) etudiant.getValue()).getGroupe()
-					+ "</td><td><a href=\"/details.toto?id="+ etudiant.getKey() + "\">Afficher détail</a></td></tr>";
+			this.htmlContent += "<tr ><td>" + ((Etudiant) etudiant.getValue()).getNom();
+			this.htmlContent += "</td><td>" + ((Etudiant) etudiant.getValue()).getPrenom();
+			this.htmlContent += "</td><td>"	+ ((Etudiant) etudiant.getValue()).getGroupe();
+			this.htmlContent += "</td><td><a href=\"/details.toto?action=view&id=" + etudiant.getKey() + "\">Afficher détail</a></td></tr>";
 		}
 
 		// Fin du corps du tableau
 		this.htmlContent += "</tbody>";
+	}
+
+	private void generateForm(File file)
+	{
+		// Récupération des étudiants
+		EtudiantMap etudiants = this.loadEtudiants(file);
+		Etudiant etudiant = etudiants.get(this.parameters.get("id"));
+
+		this.htmlContent += "<input type=\"hidden\" name=\"id\" value=\""+ this.parameters.get("id") + "\">";
+		this.htmlContent += "<input type=\"text\" name=\"nom\" value=\""+ etudiant.getNom() + "\">";
+		this.htmlContent += "<input type=\"text\" name=\"prenom\" value=\""+ etudiant.getPrenom() + "\">";
+		this.htmlContent += "<input type=\"text\" name=\"groupe\" value=\""+ etudiant.getGroupe() + "\">";
+		this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"update\">";
+		this.htmlContent += "<input type=\"submit\" name=\"action\" value=\"delete\">";
 	}
 
 	/**
