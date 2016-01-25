@@ -2,20 +2,14 @@ package com.iut.html.server;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
-
-import javax.management.BadAttributeValueExpException;
-import javax.print.AttributeException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
 import org.xml.sax.SAXException;
-
 import com.iut.html.sax.SAXHandler;
 
 /**
@@ -47,9 +41,9 @@ public class HTTPRequestHandler
 
 		// Teste la validité de la requête
 		if (request == null || ! request.startsWith("GET "))
-			throw new HTTPBadRequestException();
-		else
-			request = request.substring(5, request.indexOf("HTTP"));
+            throw new HTTPBadRequestException();
+        else
+            request = request.substring(5, request.indexOf("HTTP")).trim();
 
 		// Récupération du fichier demandé et des paramètres de la requête
 		if(request.indexOf("?") != -1) {
@@ -61,11 +55,12 @@ public class HTTPRequestHandler
 		}
 
 		// Log
-		System.out.println("Fichier demandé : " + file.getAbsolutePath());
+        System.out.println("Fichier demandé : " + this.file.getPath());
+        System.out.println("Paramètres : " + this.parameters.toString());
 
 		// Teste si le fichier demandé existe
 		if (! this.file.isFile())
-			throw new HTTPBadRequestException();
+            throw new HTTPBadRequestException();
 	}
 
 	/**
